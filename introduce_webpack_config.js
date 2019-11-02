@@ -1,4 +1,5 @@
 const path = require('path')
+const fs = require('fs')
 
 module.exports = {
     // 入口配置
@@ -122,10 +123,10 @@ module.exports = {
     // 配置插件
     plugins: [],
 
-    // DevServer 相关配置（）
+    // DevServer 相关配置（注意是本地模拟服务，实际上线将不生效）
     devServer: {
         hot: true, // 热更新,将在不刷新页面的情况下替换新老模块做到实时预览
-        host: 'example.com', // 配置访问域名
+        host: 'example.com', // 配置访问域名（若希望局域网其他设备访问本地服务，设置为 0.0.0.0）
         port: 3000, // 配置访问端口号
         open: true, // 启动打开浏览器
         historyApiFallback: true, // 是否开发 HTML5 History Api 的单页应用,在命中路由后都会返回 index.html
@@ -139,11 +140,26 @@ module.exports = {
         // 配置 DevServer HTTP 服务器的文件根目录,默认为当前根目录,一般没必要设置它,或者可以设置 false 关闭暴露本地文件
         // 除非有其他文件需要被 DevServer 服务,例如将 根目录下的 public 目录设置为 DevServer 服务器的文件根目录
         contentBase: path.join(__dirname, 'public'),
+        allowedHosts: [ // 配置 http 请求白名单，只有在白名单内才能正常返回
+            'host.com',
+            '.host1.com' // host1.com 和所有子域名 *.host1.com 都将匹配
+        ],
         headers: { // 注入 http 的响应头
             'X-foo': 'bar'
         },
-        disableHostCheck: true, // 是否检查域名
-        https: false, // 是否开启 HTTPS 模式
+        // 是否关闭用于 DNS 重新绑定的 HTTP 请求的 HOST 检查
+        // 默认只接受来自本地的请求，关闭后可以接受来自任意 HOST 的请求
+        disableHostCheck: true,
+        https: false, // 是否开启 HTTPS 模式，为 true 会自动为我们生成一份 HTTPS 证书
+        https: { // 如果想用自己的证书
+            key: fs.readFileSync('path/to/server.key'),
+            cert: fs.readFileSync('path/to/server.crt'),
+            ca: fs.readFileSync('path/to/ca.pem')
+        },
+        // 配置客户端的日志等级，默认是 info，即在浏览器开发者工具控制台里输出所有类型的日志
+        // 可以取 none、error、warning、info，为 none 时可以不输出任何日志
+        clientLogLevel: info,
+        compress: false, // 配置是否启用 Gzip 压缩，默认为 false
         proxy: { // 代理到后端服务接口
             '/api': {
                 target: 'http://example.com',
@@ -171,6 +187,13 @@ module.exports = {
     profile: true, // 是否捕捉 Webpack 构建的性能信息,用于分析是什么原因导致的构建性能不佳
     cache: false, // 是否启用缓存来提升构建速度
 
+    // 用来告诉 Webpack 如何去寻找 Loader
+    resolveLoader: {
+        modules: ['node_modules'], // 去哪个目录下寻找 Loader
+        extensions: ['.js', '.json'], // 入口文件的后缀
+        mainFields: ['loader', 'main'] // 指明入口文件位置的字段
+    },
+
     // 监听文件变化
     watch: true, // 是否开启
     watchOptions: { // 监听模式选项,watch 要求为 true
@@ -188,7 +211,8 @@ module.exports = {
     target: 'electron-main', // electron,主线程
     target: 'electron-renderer', // electron,渲染线程
 
-    // 来自 Javascript 运行环境提供的全局变量
+    // 来自 Javascript 运行环境提供的全局变量,不需要被打包而是直接使用
+    // 针对 import $ from 'jquery' 会被打包的问题
     externals: {
         jquery: 'jQuery'
     },
