@@ -1,0 +1,22 @@
+{
+  "name": "webpack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "introduce_webpack_config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xiaoshenjing/deep-webpack.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xiaoshenjing/deep-webpack/issues"
+  },
+  "homepage": "https://github.com/xiaoshenjing/deep-webpack#readme",
+  "dependencies": {
+    "webpack": "^4.41.2"
+  }
+}
